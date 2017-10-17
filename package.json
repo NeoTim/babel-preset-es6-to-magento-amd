@@ -1,0 +1,69 @@
+{
+  "name": "babel-preset-es6-to-magento-amd",
+  "version": "1.1.0",
+  "description": "Transforms ES6 modules into Magento friendly AMD",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "build": "babel src --out-dir build",
+    "watch": "npm run build -- --watch",
+    "prepack": "npm run build",
+    "postinstall": "npm run build"
+  },
+  "files": [
+    "build"
+  ],
+  "engines": {
+    "node": ">=4"
+  },
+  "keywords": [
+    "magento2",
+    "amd",
+    "es6"
+  ],
+  "author": "",
+  "license": "OSL-3.0",
+  "devDependencies": {
+    "babel-jest": "^21.0.0",
+    "babel-traverse": "^7.0.0-beta.3",
+    "babylon": "7.0.0-beta.28",
+    "eslint": "^4.5.0",
+    "eslint-config-msrose": "^1.0.0",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-jest": "^21.0.0",
+    "eslint-plugin-prettier": "^2.2.0",
+    "jest": "^21.0.1",
+    "jest-diff": "^21.0.0",
+    "prettier": "^1.7.4",
+    "regenerator-runtime": "^0.11.0"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "<rootDir>/tests/utils/setup.js",
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "testMatch": [
+      "<rootDir>/tests/**/*.(test|spec).js"
+    ],
+    "modulePaths": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/src/"
+    ],
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "babel-cli": "^7.0.0-beta.3",
+    "babel-core": "^7.0.0-beta.3",
+    "babel-plugin-transform-amd-to-commonjs": "^0.2.2",
+    "babel-plugin-transform-class-properties": "^7.0.0-beta.3",
+    "babel-plugin-transform-es2015-modules-amd": "^7.0.0-beta.3",
+    "babel-plugin-transform-es2015-modules-commonjs": "^7.0.0-beta.3",
+    "babel-plugin-transform-typescript": "^7.0.0-beta.3",
+    "babel-types": "^7.0.0-beta.3",
+    "babel-preset-es2015": "^7.0.0-beta.3",
+    "babel-preset-stage-0": "^7.0.0-beta.3",
+    "jest-resolve": "^21.2.0",
+    "requirejs": "^2.3.5"
+  }
+}
