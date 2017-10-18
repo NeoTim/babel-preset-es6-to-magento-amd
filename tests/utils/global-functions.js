@@ -3,18 +3,22 @@ import { transform } from 'babel-core';
 import { parse } from 'babylon';
 import { readFileSync } from 'fs';
 
-const transformCode = (code, presets) => {
+const transformCode = (code, preset, parsePreset) => {
+    const presets = [preset];
+    if (parsePreset) {
+        presets.push(parsePreset);
+    }
+
     return {
         code: transform(code, {presets: presets, babelrc: false}).code,
         from: code,
-        presets: presets
+        parsePreset: parsePreset
     };
 };
 
 const typescriptPreset = {
     plugins: [
-        'transform-typescript',
-        'transform-class-properties'
+        'transform-typescript'
     ]
 };
 
@@ -22,22 +26,22 @@ const createPresetFactory = (expect) => {
     return (preset) => {
         return {
             expectTypeScript(code) {
-                return expect(transformCode(code, [typescriptPreset, preset]));
+                return expect(transformCode(code, preset, typescriptPreset));
             },
             expectTypeScriptError(code) {
-                return expect(() => {transformCode(code, [typescriptPreset, preset])})
+                return expect(() => transformCode(code, preset, typescriptPreset))
             },
             expectTypeScriptFile(file) {
-                return this.expectTypeScript(readFileSync(file), preset);
+                return this.expectTypeScript(readFileSync(file));
             },
             expectJavaScript(code) {
-                return expect(transformCode(code, [preset]));
+                return expect(transformCode(code, preset));
             },
             expectJavaScriptError(code) {
-                return expect(() => {transformCode(code, [preset])})
+                return expect(() => transformCode(code, preset))
             },
             expectJavaScriptFile(file) {
-                return this.expectJavaScript(readFileSync(file), preset);
+                return this.expectJavaScript(readFileSync(file));
             }
         };
     };

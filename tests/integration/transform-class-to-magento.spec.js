@@ -1,4 +1,4 @@
-const preset = require('preset/classes').default;
+const preset = require('preset/classes');
 
 describe('transform-es6-class-to-magento', () => {
   beforeAll(() => {
@@ -69,12 +69,8 @@ describe('transform-es6-class-to-magento', () => {
     expectJavaScript(
       `define(["uiElement"], function (Element) {
         class CoolClass extends Element {
-          constructor() {
-            this.property = 'one';
-            this.default = {
-              value: 1
-            };
-          }
+          property = 'one';
+          defaults = {value: 1};
 
           someMethod(argument) {
             return true;
@@ -87,10 +83,9 @@ describe('transform-es6-class-to-magento', () => {
       `define(["uiElement"], function (Element) {
         const CoolClass = Element.extend({
           property: 'one',
-          default: {
+          defaults: {
             value: 1          
           },
-          initialize: function () {},
           someMethod: function (argument) {
             return true;
           }
@@ -111,7 +106,7 @@ describe('transform-es6-class-to-magento', () => {
 
           someMethod(argument) {
             super.someMethod(argument).otherCall();
-          }
+          } 
         }
         
         return CoolClass;
@@ -132,17 +127,17 @@ describe('transform-es6-class-to-magento', () => {
     );
   });
 
-    it('methods with super calls correctly transofrmed into Magento _super', () => {
-        expectJavaScriptError(
-            `define(["uiElement"], function (Element) {
-        class CoolClass extends Element {
-          someMethod(argument) {
-            super.otherCall();
-          }
+  it('methods with super calls correctly transofrmed into Magento _super', () => {
+      expectJavaScriptError(
+          `define(["uiElement"], function (Element) {
+      class CoolClass extends Element {
+        someMethod(argument) {
+          super.otherCall();
         }
-        
-        return CoolClass;
-      });`
-        ).toThrow();
-    });
+      }
+      
+      return CoolClass;
+    });`
+      ).toThrow();
+  });
 });

@@ -4,8 +4,12 @@ const babel = require('babel-core');
 const diff = require('jest-diff');
 const fs = require('fs');
 
-const normalizeFormatting = code => {
-  return babel.transform(code).code;
+const normalizeFormatting = (code, preset) => {
+  return babel.transform(code, {
+      presets: preset ? [preset] : [],
+      plugins: ['syntax-class-properties'],
+      babelrc: false
+  }).code;
 };
 
 const removeBlankLines = string => {
@@ -37,7 +41,7 @@ const createFailMessage = (pass, utils, verb, actual, expected, originalValue) =
 
 const customMatcher = {
   toTransformLike(actual, expected) {
-    const originalCode = removeBlankLines(normalizeFormatting(actual.from));
+    const originalCode = removeBlankLines(normalizeFormatting(actual.from, actual.parsePreset));
     const actualCode = removeBlankLines(normalizeFormatting(actual.code));
     const expectedCode = removeBlankLines(normalizeFormatting(expected));
     const pass = actualCode === expectedCode;
