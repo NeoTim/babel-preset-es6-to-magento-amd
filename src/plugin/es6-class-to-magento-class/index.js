@@ -1,12 +1,49 @@
-import { findAmdModule, extractDependencyAndFactory, extractDependencyMap } from '../../ast-utils';
+import {
+  findAmdModule,
+  extractDependencyAndFactory,
+  extractDependencyMap,
+  isObjectAssignment
+} from '../../ast-utils';
 import * as t from 'babel-types';
 
+const classMethodVisitor = {
+  AssignmentExpression(path, state) {
+    if (state.isConstructor && isObjectAssignment(path, t.thisExpression())) {
+      state.constructorProperties.push(t.objectProperty(path.node.left.property, path.node.right));
+      path.remove();
+    }
+  },
+  Super(path, state) {
+    if (state.isConstructor && t.isCallExpression(path.parent)) {
+      path.replaceWith(t.identifier('_super'));
+      return;
+    }
+
+    if (t.isMemberExpression(path.parent) && t.isIdentifier(path.parent.property, {name: state.methodName})) {
+      path.parentPath.replaceWith(t.identifier('_super'));
+      return;
+    }
+
+    throw path.buildCodeFrameError('You can call super object method only on the same method as current one');
+  }
+};
+
 const classBodyVisitor = {
-  ClassProperty: function() {},
   ClassMethod: function(path, state) {
+    path.skip();
+
+    const constructorProperties = [];
+
+    const isConstructor = t.isIdentifier(path.node.key, { name: 'constructor' });
+    const methodName = isConstructor ? 'initialize' : path.node.key.name;
+
+    path.traverse(classMethodVisitor, { isConstructor, methodName, constructorProperties });
+
+    this.classProperties = state.classProperties.concat(constructorProperties);
+
     state.properties.push(
       t.objectProperty(
-        path.node.key,
+        isConstructor ? t.identifier('initialize') : path.node.key,
         t.functionExpression(
           null,
           path.node.params,
@@ -27,6 +64,7 @@ const factoryBodyVisitor = {
     const superClass = path.get('superClass');
     if (state.replaceClasses[superClass.node.name]) {
       const classState = {
+        classProperties: [],
         properties: []
       };
 
@@ -36,7 +74,7 @@ const factoryBodyVisitor = {
           t.variableDeclarator(
             path.node.id,
             t.callExpression(t.memberExpression(superClass.node, t.identifier('extend')), [
-              t.objectExpression(classState.properties)
+              t.objectExpression(classState.classProperties.concat(classState.properties))
             ])
           )
         ])

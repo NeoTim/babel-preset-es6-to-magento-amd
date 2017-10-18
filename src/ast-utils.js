@@ -101,7 +101,7 @@ export function isEsModulePropertyDefinition(path, scope) {
 }
 
 export function isObjectAssignment(path, objectId) {
-  const expression = findExpression(path);
+  const expression = t.isAssignmentExpression(path) ? path : findExpression(path);
   const isMemberAssignment =
     t.isAssignmentExpression(expression) && t.isMemberExpression(expression.get('left'));
 
