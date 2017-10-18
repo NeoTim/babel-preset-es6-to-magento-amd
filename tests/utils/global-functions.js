@@ -81,6 +81,13 @@ export default function (scope) {
         },
         fixture(code, sourceType = 'module') {
             return fixtureFactory(code, sourceType);
+        },
+        isMatching(typeValidator) {
+            return {
+                asymmetricMatch(other) {
+                    return typeValidator(other);
+                }
+            }
         }
     };
 };
