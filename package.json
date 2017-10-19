@@ -35,6 +35,7 @@
     "eslint-plugin-prettier": "^2.2.0",
     "jest": "^21.0.1",
     "jest-diff": "^21.0.0",
+    "js-beautify": "^1.7.4",
     "prettier": "^1.7.4",
     "regenerator-runtime": "^0.11.0"
   },

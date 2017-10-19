@@ -1,8 +1,6 @@
-const preset = require('preset/amd-to-requirejs');
-
 describe('transform-es6-amd-to-requirejs', () => {
   beforeAll(() => {
-    exposeBabel(preset);
+      exposeBabel(require('preset/amd-to-requirejs'));
   });
 
   it('exports functions in es5 module in top level return object', () => {

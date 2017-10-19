@@ -2,7 +2,7 @@ const preset = require('preset/classes');
 
 describe('transform-es6-class-to-magento', () => {
   beforeAll(() => {
-    exposeBabel(preset(['uiCollection', 'uiElement']));
+    exposeBabel([preset, {magentoClasses: ['uiCollection', 'uiElement']}]);
   });
 
   it('leaves non magento class in tact', () => {

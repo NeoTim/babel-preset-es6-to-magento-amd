@@ -1,8 +1,12 @@
-import transformAmdToRequireJs from './preset/amd-to-requirejs';
-import transformClasses from './preset/classes';
+import amdToMagentoAmd from './plugin/amd-to-magento-amd';
+import esClassToMagentoClass from './plugin/es6-class-to-magento-class';
+import esModuleToAmd from 'babel-plugin-transform-es2015-modules-amd';
 
-export function preset(magentoClasses) {
+export default function(context, opts) {
+  const magentoClasses = (opts && opts.magentoClasses) || [];
+  const otherPresets = (opts && opts.presets) || [];
   return {
-    presets: [transformClasses(magentoClasses), transformAmdToRequireJs]
+    presets: otherPresets,
+    plugins: [esModuleToAmd, amdToMagentoAmd, [esClassToMagentoClass, { magentoClasses }]]
   };
 }

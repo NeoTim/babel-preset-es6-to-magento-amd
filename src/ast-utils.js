@@ -122,14 +122,15 @@ export function isInteropRequireCall(path) {
     t.isAssignmentExpression(expression) && t.isCallExpression(expression.get('right'));
 
   if (isAssignmentCall) {
-    return expression.get('right.callee').node.name.indexOf(INTEROP_FUNCTION_NAME) === 0;
+    const callee = expression.get('right.callee');
+    return callee.isIdentifier() && callee.node.name.indexOf(INTEROP_FUNCTION_NAME) === 0;
   }
 
   return false;
 }
 
 export function isInteropRequireDefinition(path) {
-  if (t.isFunction(path)) {
+  if (t.isFunction(path) && path.node.id) {
     return path.node.id.name.indexOf(INTEROP_FUNCTION_NAME) === 0;
   }
 

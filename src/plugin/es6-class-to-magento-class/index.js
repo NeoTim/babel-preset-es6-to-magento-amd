@@ -65,7 +65,7 @@ const factoryBodyVisitor = {
   ClassDeclaration(path, state) {
     path.skip();
     const superClass = path.get('superClass');
-    if (state.replaceClasses[superClass.node.name]) {
+    if (t.isIdentifier(superClass.node) && state.replaceClasses[superClass.node.name]) {
       const classState = {
         classProperties: [],
         properties: []

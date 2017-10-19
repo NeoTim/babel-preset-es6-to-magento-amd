@@ -238,6 +238,7 @@ describe('isInteropRequireCall', function() {
         someValue = someValue;
         someValue = anotherCall(someValue);
         someValue = _interopRequireDefault2(someValue);
+        someValue = object.call(someValue);
     `);
 
   it('returns true when a proper interop assignment call provided', () => {
@@ -259,6 +260,9 @@ describe('isInteropRequireCall', function() {
   it('returns true when a proper interop assignment call with indexed name', () => {
     expect(isInteropRequireCall(ast.body(4))).toBe(true);
   });
+  it('returns false when member expression call is used', () => {
+      expect(isInteropRequireCall(ast.body(5))).toBe(false);
+  });
 });
 
 describe('isInteropRequireDefinition', function() {
@@ -267,6 +271,7 @@ describe('isInteropRequireDefinition', function() {
         nonDefinition;
         function anotherFunction() {}
         function _interopRequireDefault2() {}
+        (function () {});
     `);
 
   it('returns true when a proper interop definition provided', () => {
@@ -283,5 +288,9 @@ describe('isInteropRequireDefinition', function() {
 
   it('returns true when a proper interop definition provided with function index', () => {
     expect(isInteropRequireDefinition(ast.body(3))).toBe(true);
+  });
+
+  it('returns false when an anonymous function is hit', () => {
+      expect(isInteropRequireDefinition(ast.bodyPath('expression', 4))).toBe(false);
   });
 });

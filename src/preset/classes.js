@@ -1,7 +1,6 @@
-module.exports = function(magentoClasses) {
+module.exports = function(context, opts) {
+  const magentoClasses = (opts && opts.magentoClasses) || [];
   return {
-    plugins: [
-      [require('../plugin/es6-class-to-magento-class'), {magentoClasses}]
-    ]
+    plugins: [[__dirname + '/../plugin/es6-class-to-magento-class', { magentoClasses }]]
   };
 };
