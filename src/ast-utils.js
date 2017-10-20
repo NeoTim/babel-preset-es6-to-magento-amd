@@ -1,6 +1,6 @@
 import * as t from 'babel-types';
 
-const INTEROP_FUNCTION_NAME = '_interopRequireDefault';
+const INTEROP_FUNCTION_NAME = '_interopRequire';
 
 const findExpression = path => {
   if (!t.isExpressionStatement(path.node)) {
