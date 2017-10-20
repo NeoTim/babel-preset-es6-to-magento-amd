@@ -29,8 +29,6 @@ const replaceExportAssignment = (path, state) => {
 
 const functionBodyVisitor = {
   ExpressionStatement(path, state) {
-    path.skip();
-
     if (isEsModulePropertyDefinition(path, state.scope)) {
       path.remove();
     }
