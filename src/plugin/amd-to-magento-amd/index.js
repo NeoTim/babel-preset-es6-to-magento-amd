@@ -27,6 +27,20 @@ const replaceExportAssignment = (path, state) => {
   state.exports.push(t.objectProperty(property.node, expression.node));
 };
 
+const memberExpressionVisitor = {
+  MemberExpression(path, state) {
+    const matchedDependencies = state.dependencies.filter(item =>
+      path.get('object').isIdentifier({ name: item.name })
+    );
+    const isDefaultDependency =
+      matchedDependencies.length === 1 && path.get('property').isIdentifier({ name: 'default' });
+
+    if (isDefaultDependency) {
+      path.replaceWith(matchedDependencies[0]);
+    }
+  }
+};
+
 const functionBodyVisitor = {
   ExpressionStatement(path, state) {
     if (isEsModulePropertyDefinition(path, state.scope)) {
@@ -39,27 +53,22 @@ const functionBodyVisitor = {
       path.remove();
     }
   },
-  Function(path) {
+  Function(path, state) {
     if (isInteropRequireDefinition(path)) {
       path.remove();
     }
-  },
-  MemberExpression(path, state) {
-    const matchedDependencies = state.dependencies.filter(item =>
-      path.get('object').isIdentifier({ name: item.name })
-    );
-    const isDefaultDependency =
-      matchedDependencies.length === 1 && path.get('property').isIdentifier({ name: 'default' });
 
-    if (isDefaultDependency) {
-      path.replaceWith(matchedDependencies[0]);
-    }
+    path.traverse(memberExpressionVisitor, state);
+  },
+  ClassMethod(path, state) {
+    path.traverse(memberExpressionVisitor, state);
   },
   DirectiveLiteral(path) {
     if (path.node.value === 'use strict') {
       path.parentPath.remove();
     }
-  }
+  },
+  MemberExpression: memberExpressionVisitor.MemberExpression
 };
 
 const processAmdDefinition = path => {
