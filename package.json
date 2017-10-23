@@ -1,6 +1,6 @@
 {
   "name": "babel-preset-es6-to-magento-amd",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Transforms ES6 modules into Magento friendly AMD",
   "main": "build/index.js",
   "scripts": {
