@@ -102,15 +102,23 @@ const processAmdDefinition = (path, magentoClasses) => {
   factory.traverse(factoryBodyVisitor, state);
 };
 
+const programVisitor = {
+  ExpressionStatement(path, state) {
+    const amdModule = findAmdModule(path);
+    const magentoClasses = state.opts.magentoClasses;
+    if (amdModule) {
+      processAmdDefinition(amdModule, magentoClasses);
+    }
+  }
+};
+
 export default function() {
   return {
     inherits: classPropertySyntax,
     visitor: {
-      ExpressionStatement(path, state) {
-        const amdModule = findAmdModule(path);
-        const magentoClasses = state.opts.magentoClasses;
-        if (amdModule) {
-          processAmdDefinition(amdModule, magentoClasses);
+      Program: {
+        exit(path, state) {
+          path.traverse(programVisitor, state);
         }
       }
     }

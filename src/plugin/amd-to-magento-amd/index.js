@@ -101,13 +101,21 @@ const processAmdDefinition = path => {
   }
 };
 
+const programVisitor = {
+  ExpressionStatement(path) {
+    const amdModule = findAmdModule(path);
+    if (amdModule) {
+      processAmdDefinition(amdModule);
+    }
+  }
+};
+
 export default function() {
   return {
     visitor: {
-      ExpressionStatement(path) {
-        const amdModule = findAmdModule(path);
-        if (amdModule) {
-          processAmdDefinition(amdModule);
+      Program: {
+        exit(path) {
+          path.traverse(programVisitor);
         }
       }
     }
