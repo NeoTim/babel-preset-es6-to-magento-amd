@@ -43,10 +43,11 @@ describe('transform-es6-amd-to-requirejs', () => {
     expectTypeScript(`
         import Test from 'test'; 
         
-        export default class extends Test {}
+        export default class MyClass extends Test {}
     `).toTransformLike(`
         define(["test"], function (_test) { 
-            const _default = _test.extend({}); 
+            const MyClass = _test.extend({});
+            var _default = MyClass;
             return _default;
         });
     `);

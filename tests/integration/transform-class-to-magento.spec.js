@@ -20,25 +20,55 @@ describe('transform-es6-class-to-magento', () => {
   });
 
   it('simple class is transformed into Magento format', () => {
-    expectJavaScript(
-      `define(["uiElement"], function (Element) {
-        class CoolClass extends Element {
-          someMethod(argument) {
-            return true;
-          }
+      expectJavaScript(
+          `define(["uiElement"], function (Element) {
+      class CoolClass extends Element {
+        someMethod(argument) {
+          return true;
         }
-        return CoolClass;
-       });`
+      }
+      return CoolClass;
+     });`
+      ).toTransformLike(
+          `define(["uiElement"], function (Element) {
+      const CoolClass = Element.extend({
+        someMethod: function (argument) {
+          return true;
+        }
+      });
+        
+      return CoolClass;
+  });`
+      );
+  });
+
+  it('es6 module class is transformed into Magento format', () => {
+    expectJavaScript(
+      `
+      import Collection, {Item} from 'someDependency';
+      import Element from 'uiElement';
+       
+      class CoolElement extends Element {}
+      
+      class CoolCollection extends Collection {}
+      
+      class Regular extends ClassB {}
+      
+      class CoolItem extends Item {}
+      `
     ).toTransformLike(
-      `define(["uiElement"], function (Element) {
-        const CoolClass = Element.extend({
-          someMethod: function (argument) {
-            return true;
-          }
-        });
-          
-        return CoolClass;
-    });`
+      `
+      import Collection, {Item} from 'someDependency';
+      import Element from 'uiElement';
+      
+      const CoolElement = Element.extend({});
+      
+      class CoolCollection extends Collection {}
+      
+      class Regular extends ClassB {}
+      
+      class CoolItem extends Item {}
+`
     );
   });
 

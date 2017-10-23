@@ -61,64 +61,76 @@ const classBodyVisitor = {
   }
 };
 
-const factoryBodyVisitor = {
-  ClassDeclaration(path, state) {
-    path.skip();
-    const superClass = path.get('superClass');
-    if (t.isIdentifier(superClass.node) && state.replaceClasses[superClass.node.name]) {
-      const classState = {
-        classProperties: [],
-        properties: []
-      };
+const extractDependencyMapFromImport = path => {
+  const dependencyMap = {};
 
-      path.traverse(classBodyVisitor, classState);
-      path.replaceWith(
-        t.variableDeclaration('const', [
-          t.variableDeclarator(
-            path.node.id,
-            t.callExpression(t.memberExpression(superClass.node, t.identifier('extend')), [
-              t.objectExpression(classState.classProperties.concat(classState.properties))
-            ])
-          )
-        ])
-      );
-    }
-  }
-};
-
-const processAmdDefinition = (path, magentoClasses) => {
-  const { factory } = extractDependencyAndFactory(path);
-  const dependencyMap = extractDependencyMap(path);
-  const replaceClasses = {};
-
-  Object.keys(dependencyMap)
-    .filter(key => magentoClasses.indexOf(key) !== -1)
-    .forEach(key => {
-      replaceClasses[dependencyMap[key].name] = key;
+  if (path) {
+    path.get('body').forEach(statement => {
+      if (statement.isImportDeclaration()) {
+        statement.get('specifiers').forEach(specifier => {
+          if (specifier.isImportDefaultSpecifier()) {
+            dependencyMap[statement.node.source.value] = specifier.node.local;
+          }
+        });
+      }
     });
+  }
 
-  const state = { replaceClasses };
-
-  factory.traverse(factoryBodyVisitor, state);
+  return dependencyMap;
 };
 
-const programVisitor = {
-  ExpressionStatement(path, state) {
-    const amdModule = findAmdModule(path);
-    const magentoClasses = state.opts.magentoClasses;
-    if (amdModule) {
-      processAmdDefinition(amdModule, magentoClasses);
-    }
-  }
+const isMagentoSuperClass = (path, magentoClasses) => {
+  const amdModuleParent = path.find(
+    parent => (parent.isExpressionStatement() ? findAmdModule(parent) : false)
+  );
+
+  const dependencyMap = amdModuleParent
+    ? extractDependencyMap(findAmdModule(amdModuleParent))
+    : extractDependencyMapFromImport(path.find(parent => parent.isProgram()));
+
+  return (
+    Object.keys(dependencyMap)
+      .filter(key => magentoClasses.indexOf(key) !== -1)
+      .findIndex(key => path.isIdentifier({ name: dependencyMap[key].name })) !== -1
+  );
 };
 
 export default function() {
   return {
     inherits: classPropertySyntax,
     visitor: {
-      Program: {
-        exit(path, state) {
-          path.traverse(programVisitor, state);
+      ClassDeclaration(path, state) {
+        const superClass = path.get('superClass');
+        if (
+          t.isIdentifier(superClass.node) &&
+          isMagentoSuperClass(superClass, state.opts.magentoClasses)
+        ) {
+          const classState = {
+            classProperties: [],
+            properties: []
+          };
+
+          if (!path.node.id) {
+            path.node.id = path.scope.generateUidIdentifier('_defaultClass');
+          }
+
+          path.traverse(classBodyVisitor, classState);
+          const magentoClass = t.variableDeclaration('const', [
+            t.variableDeclarator(
+              path.node.id,
+              t.callExpression(t.memberExpression(superClass.node, t.identifier('extend')), [
+                t.objectExpression(classState.classProperties.concat(classState.properties))
+              ])
+            )
+          ]);
+
+          if (path.parentPath.isExportDeclaration()) {
+            path.parentPath.insertBefore(magentoClass);
+            path.replaceWith(path.node.id);
+            return;
+          }
+
+          path.replaceWith(magentoClass);
         }
       }
     }
