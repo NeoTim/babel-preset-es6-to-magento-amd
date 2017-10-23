@@ -32,8 +32,10 @@ const classMethodVisitor = {
 
 const classBodyVisitor = {
   ClassProperty: function(path, state) {
+    const value = path.node.value || t.nullLiteral();
+
     state.classProperties.push(
-      t.objectProperty(path.node.key, path.node.value, path.node.computed, false)
+      t.objectProperty(path.node.key, value, path.node.computed, false)
     );
   },
   ClassMethod: function(path, state) {
