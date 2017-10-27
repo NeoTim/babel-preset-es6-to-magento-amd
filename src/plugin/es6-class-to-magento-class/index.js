@@ -12,7 +12,7 @@ import classPropertySyntax from 'babel-plugin-syntax-class-properties';
 const classMethodVisitor = {
   Super(path, state) {
     if (state.isConstructor && t.isCallExpression(path.parent)) {
-      path.replaceWith(t.identifier('_super'));
+      path.replaceWith(t.memberExpression(t.thisExpression(), t.identifier('_super')));
       return;
     }
 
@@ -20,7 +20,7 @@ const classMethodVisitor = {
       t.isMemberExpression(path.parent) &&
       t.isIdentifier(path.parent.property, { name: state.methodName })
     ) {
-      path.parentPath.replaceWith(t.identifier('_super'));
+      path.parentPath.replaceWith(t.memberExpression(t.thisExpression(), t.identifier('_super')));
       return;
     }
 

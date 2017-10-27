@@ -145,10 +145,10 @@ describe('transform-es6-class-to-magento', () => {
       `define(["uiElement"], function (Element) {
         const CoolClass = Element.extend({
           initialize: function () {
-            _super();
+            this._super();
           },
           someMethod: function (argument) {
-            _super(argument).otherCall();
+            this._super(argument).otherCall();
           }
         });
         
